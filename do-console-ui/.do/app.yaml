@@ -1,0 +1,21 @@
+# DigitalOcean App Platform spec
+# Deploy: push this repo and connect it in the DO Control Panel (Apps > Create App > GitHub).
+# Repo and branch are set when you link the repo; override build/run here if needed.
+
+name: do-console-ui
+region: nyc
+
+services:
+  - name: web
+    environment_slug: node-js
+    build_command: npm ci && npm run build
+    run_command: npm start
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    envs:
+      - key: NODE_ENV
+        value: production
+        scope: RUN_AND_BUILD_TIME
+        type: GENERAL
+      # Add OPENAI_API_KEY (type: SECRET) and others in the App Platform dashboard

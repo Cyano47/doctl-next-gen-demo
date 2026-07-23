@@ -1,0 +1,21 @@
+{
+  "portfolio_json": [
+    {"symbol": "RELIANCE", "name": "Reliance Industries", "quantity": 50, "cost_price": 2400, "sector": "Energy", "geography": "India", "asset_type": "equity", "purchase_date": "2023-06-15"},
+    {"symbol": "TCS", "name": "Tata Consultancy Services", "quantity": 30, "cost_price": 3200, "sector": "IT", "geography": "India", "asset_type": "equity", "purchase_date": "2024-01-10"},
+    {"symbol": "HDFCBANK", "name": "HDFC Bank", "quantity": 40, "cost_price": 1600, "sector": "Financials", "geography": "India", "asset_type": "equity", "purchase_date": "2023-03-20"},
+    {"symbol": "INFY", "name": "Infosys", "quantity": 60, "cost_price": 1400, "sector": "IT", "geography": "India", "asset_type": "equity", "purchase_date": "2022-11-01"},
+    {"symbol": "AAPL", "name": "Apple Inc", "quantity": 20, "cost_price": 180, "sector": "Technology", "geography": "US", "asset_type": "equity", "purchase_date": "2024-06-01"},
+    {"symbol": "GOLD-MCX", "name": "Gold MCX", "quantity": 10, "cost_price": 62000, "sector": "Commodity", "geography": "Other", "asset_type": "commodity", "purchase_date": "2023-09-12"},
+    {"symbol": "BTC", "name": "Bitcoin", "quantity": 0.5, "cost_price": 42000, "sector": "Crypto", "geography": "Other", "asset_type": "crypto", "purchase_date": "2023-01-05"}
+  ],
+  "current_prices_json": {
+    "RELIANCE": 2480,
+    "TCS": 3800,
+    "HDFCBANK": 1680,
+    "INFY": 1050,
+    "AAPL": 225,
+    "GOLD-MCX": 72500,
+    "BTC": 95000
+  },
+  "risk_tolerance": "Moderate"
+}

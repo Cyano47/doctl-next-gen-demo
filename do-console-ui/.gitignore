@@ -1,0 +1,22 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# Env and secrets (do not commit tokens)
+.env
+.env.local
+.env.*.local
+.cursor/mcp.json
+.do/app-deploy.yaml
+
+# Logs and OS
+*.log
+.DS_Store
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo

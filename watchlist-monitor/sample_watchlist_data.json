@@ -1,0 +1,83 @@
+{
+  "watchlist_symbols": ["RELIANCE", "TCS", "INFY", "HDFCBANK", "AAPL", "GOOGL"],
+  "market_data": {
+    "RELIANCE": {
+      "current_price": 2480,
+      "previous_close": 2410,
+      "volume": 12500000,
+      "average_volume": 8500000,
+      "target_price": 2520,
+      "sector": "Energy",
+      "support": 2350,
+      "resistance": 2550,
+      "news_sentiment_24h": "neutral",
+      "news_headlines_24h": ["RIL to expand retail presence."]
+    },
+    "TCS": {
+      "current_price": 3820,
+      "previous_close": 3650,
+      "volume": 4200000,
+      "average_volume": 1800000,
+      "target_price": 3900,
+      "sector": "IT",
+      "support": 3550,
+      "resistance": 3950,
+      "news_sentiment_24h": "positive",
+      "news_headlines_24h": ["TCS wins large deal in US."]
+    },
+    "INFY": {
+      "current_price": 1580,
+      "previous_close": 1620,
+      "volume": 9800000,
+      "average_volume": 4500000,
+      "target_price": 1750,
+      "sector": "IT",
+      "support": 1520,
+      "resistance": 1680,
+      "news_sentiment_24h": "negative",
+      "news_headlines_24h": ["Client delays impact Infosys guidance."]
+    },
+    "HDFCBANK": {
+      "current_price": 1680,
+      "previous_close": 1690,
+      "volume": 7200000,
+      "average_volume": 6200000,
+      "target_price": 1750,
+      "sector": "Financials",
+      "support": 1620,
+      "resistance": 1720,
+      "news_sentiment_24h": "neutral",
+      "news_headlines_24h": []
+    },
+    "AAPL": {
+      "current_price": 224.50,
+      "previous_close": 218.00,
+      "volume": 52000000,
+      "average_volume": 48000000,
+      "target_price": 225.00,
+      "sector": "Technology",
+      "support": 210,
+      "resistance": 230,
+      "news_sentiment_24h": "positive",
+      "news_headlines_24h": ["Apple announces new AI features."]
+    },
+    "GOOGL": {
+      "current_price": 178.20,
+      "previous_close": 179.50,
+      "volume": 18500000,
+      "average_volume": 22000000,
+      "target_price": 185.00,
+      "sector": "Technology",
+      "support": 172,
+      "resistance": 182,
+      "news_sentiment_24h": "neutral",
+      "news_headlines_24h": []
+    }
+  },
+  "sector_movements_pct": {
+    "Energy": 2.1,
+    "IT": -1.8,
+    "Financials": -0.3,
+    "Technology": 2.5
+  }
+}
