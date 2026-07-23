@@ -1,0 +1,19 @@
+# Scripted-deploy spec with GitHub source placeholders.
+# scripts/deploy-do.sh substitutes GITHUB_OWNER/GITHUB_REPO and the branch,
+# then either `doctl apps create --spec` or the DO MCP creates the app.
+
+name: doctl-next-gen-demo
+region: nyc
+
+static_sites:
+  - name: web
+    environment_slug: node-js
+    build_command: npm run build
+    output_dir: dist
+    source_dir: /
+    catchall_document: index.html
+    index_document: index.html
+    github:
+      repo: GITHUB_OWNER/GITHUB_REPO
+      branch: main
+      deploy_on_push: true

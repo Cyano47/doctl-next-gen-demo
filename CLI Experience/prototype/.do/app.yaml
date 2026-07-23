@@ -1,0 +1,22 @@
+# DigitalOcean App Platform spec — doctl next-gen demo (static site)
+#
+# Two ways to deploy:
+#   1. Control Panel: Apps > Create App > GitHub, pick the repo/branch, DO reads this file.
+#   2. CLI / MCP: use .do/app-static.yaml (has repo placeholders) via scripts/deploy-do.sh
+#      or the DO MCP tool apps__apps-create-app-from-spec.
+#
+# This is a pure Vite static build (npm run build -> dist/). No server, no secrets.
+
+name: doctl-next-gen-demo
+region: nyc
+
+static_sites:
+  - name: web
+    environment_slug: node-js
+    build_command: npm run build
+    output_dir: dist
+    # If the repo root IS this prototype folder, leave source_dir as "/".
+    # If deploying from the monorepo root, set: source_dir: "CLI Experience/prototype"
+    source_dir: /
+    catchall_document: index.html
+    index_document: index.html
