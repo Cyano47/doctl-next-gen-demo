@@ -1,0 +1,31 @@
+# Password-protected deploy: a small Node service serves the Vite build
+# behind HTTP Basic Auth (see server.mjs). The DEMO_PASSWORD value is a SECRET
+# supplied at deploy time (not stored in this file).
+
+name: doctl-next-gen-demo
+region: nyc
+
+services:
+  - name: web
+    environment_slug: node-js
+    github:
+      repo: Cyano47/doctl-next-gen-demo
+      branch: main
+      deploy_on_push: true
+    source_dir: CLI Experience/prototype
+    build_command: npm install --include=dev && npm run build
+    run_command: npm start
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    health_check:
+      http_path: /healthz
+    envs:
+      - key: DEMO_USER
+        scope: RUN_TIME
+        type: GENERAL
+        value: demo
+      - key: DEMO_PASSWORD
+        scope: RUN_TIME
+        type: SECRET
+        value: "set-at-deploy-time"
