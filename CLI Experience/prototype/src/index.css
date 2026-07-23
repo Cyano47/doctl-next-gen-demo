@@ -961,3 +961,101 @@ body {
     display: none;
   }
 }
+
+/* ---------- "Today" monochrome mode ----------
+   Today output renders as a plain black-and-white terminal: no color,
+   no boxes, no highlights — none of the modern CLI UI affordances. */
+.output.mono,
+.input-echo.mono,
+.prompt-row.mono {
+  /* Safety net: desaturate anything not explicitly overridden below. */
+  filter: grayscale(1);
+}
+
+/* Uniform grayscale text — collapse every tone to plain mono output. */
+.output.mono .tone-default,
+.output.mono .tone-accent,
+.output.mono .tone-success,
+.output.mono .tone-warn,
+.output.mono .tone-error,
+.output.mono .tone-prompt {
+  color: #d0d0d0;
+}
+.output.mono .tone-muted,
+.output.mono .tone-dim {
+  color: #9a9a9a;
+}
+.output.mono .b {
+  color: #f0f0f0;
+}
+
+/* Prompt line: no blue context, just gray. */
+.input-echo.mono .ps1-ctx,
+.prompt-row.mono .ps1-ctx {
+  color: #b8b8b8;
+  font-weight: 400;
+}
+.input-echo.mono .ps1-path,
+.input-echo.mono .ps1-mark,
+.input-echo.mono .ps1-sep,
+.input-echo.mono .cmd-text,
+.prompt-row.mono .ps1-path,
+.prompt-row.mono .ps1-mark,
+.prompt-row.mono .cmd-input {
+  color: #d0d0d0;
+}
+
+/* Tables: strip the box, borders, header color and highlight tint —
+   fall back to plain whitespace-aligned columns like classic doctl. */
+.output.mono .tbl-wrap {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  margin: 2px 0 8px;
+}
+.output.mono .tbl-title {
+  color: #9a9a9a;
+  padding: 2px 0;
+}
+.output.mono .tbl th {
+  color: #c0c0c0;
+  border-bottom: 0;
+  padding: 1px 24px 1px 0;
+  font-weight: 400;
+  text-transform: none;
+}
+.output.mono .tbl td {
+  color: #d0d0d0;
+  border-bottom: 0;
+  padding: 1px 24px 1px 0;
+}
+.output.mono .tbl th.hl,
+.output.mono .tbl td.hl {
+  background: transparent;
+  color: inherit;
+}
+
+/* Code / error blocks: flatten to plain text, no colored chrome. */
+.output.mono .code {
+  border: 0;
+  background: transparent;
+}
+.output.mono .code-head {
+  background: transparent;
+  border: 0;
+}
+.output.mono .code-lang,
+.output.mono .code-cap {
+  color: #9a9a9a;
+}
+.output.mono .code pre {
+  color: #d0d0d0;
+}
+.output.mono .err.today {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.output.mono .err-raw {
+  color: #d0d0d0;
+}

@@ -159,6 +159,40 @@ const dropletCols: Col[] = [
 // -------------------------------------------------------------------------
 
 const rootHandler = (ctx: CommandContext) => {
+  // TODAY: the plain, unstyled v1.x root output — a wall of commands, no
+  // guidance, no AI surface. This is the "before".
+  if (ctx.mode !== "nextgen") {
+    ctx.append(
+      lines(
+        line(span("doctl is a command line interface (CLI) for the DigitalOcean API.")),
+        blank(),
+        line(span("Usage:", "muted")),
+        line(span("  doctl [command]")),
+        blank(),
+        line(span("Available Commands:", "muted")),
+        line(span("  account        Display commands that retrieve account details")),
+        line(span("  apps           Display commands for working with apps")),
+        line(span("  auth           Display commands for authenticating doctl with an account")),
+        line(span("  balance        Display commands for retrieving your account balance")),
+        line(span("  compute        Display commands that manage infrastructure")),
+        line(span("  databases      Display commands that manage databases")),
+        line(span("  kubernetes     Displays commands to manage Kubernetes clusters and configurations")),
+        line(span("  projects       Manage projects and assign resources to them")),
+        line(span("  registry       Display commands for working with container registries")),
+        line(span("  version        Show the current version")),
+        blank(),
+        line(span("Flags:", "muted")),
+        line(span("  -t, --access-token string   API V2 access token")),
+        line(span("  -c, --config string         Specify a custom config file")),
+        line(span("  -o, --output string         Desired output format [text|json] (default \"text\")")),
+        line(span("  -v, --verbose               Enable verbose output")),
+        blank(),
+        line(span("Use \"doctl [command] --help\" for more information about a command.", "muted")),
+      )
+    );
+    return;
+  }
+  // NEXT-GEN: a welcoming, opinionated first run.
   ctx.append(
     panel(
       "welcome",
@@ -178,6 +212,41 @@ const rootHandler = (ctx: CommandContext) => {
 };
 
 const helpHandler = (ctx: CommandContext) => {
+  // TODAY: plain namespace listing. No AI namespace, no agent surface,
+  // no --describe. GenAI lives under a separate, non-obvious command.
+  if (ctx.mode !== "nextgen") {
+    ctx.append(
+      lines(
+        line(span("doctl", "default", { bold: true }), span(" is the command line for DigitalOcean.")),
+        blank(),
+        line(span("USAGE", "muted", { bold: true })),
+        line(span("  doctl [command] [flags]")),
+        blank(),
+        line(span("CORE", "muted", { bold: true }))
+      )
+    );
+    ctx.append(
+      table(
+        ["NAMESPACE", "DESCRIPTION"],
+        [
+          ["compute", "Droplets, SSH keys, sizes, regions, snapshots"],
+          ["apps", "App Platform: deploy from a spec file, logs"],
+          ["databases", "Managed databases: create, connection details"],
+          ["kubernetes", "DOKS clusters and node pools"],
+          ["genai", "Agents (experimental; separate from compute)"],
+          ["auth", "Authenticate and manage contexts"],
+        ]
+      )
+    );
+    ctx.append(
+      lines(
+        blank(),
+        line(span("Use ", "muted"), span("doctl [command] --help", "default"), span(" for more information about a command.", "muted"))
+      )
+    );
+    return;
+  }
+  // NEXT-GEN: guidance-first help with the AI/agent surface front and center.
   ctx.append(
     lines(
       line(span("doctl", "default", { bold: true }), span(" is the command line for DigitalOcean.")),
@@ -249,10 +318,19 @@ const accountGet = (ctx: CommandContext) => {
       [["valapati@digitalocean.com", "Support Agent", "25", "active"]]
     )
   );
+  if (ctx.mode === "nextgen") {
+    ctx.append(
+      lines(
+        line(span("Active context: ", "muted"), span("default", "default", { bold: true }), span("  ·  region ", "muted"), span("nyc1", "default", { bold: true }), span("  ·  ", "muted"), span("12 / 25 droplets used", "muted")),
+        line(span("Next: ", "muted"), span("doctl ask \"what can I build here?\"", "accent")),
+      )
+    );
+  }
 };
 
 // ---- compute droplet ----------------------------------------------------
 const dropletList = (ctx: CommandContext) => {
+  const output = flagStr(ctx.parsed.flags, "output", "text");
   emitList(ctx, store.droplets, dropletCols, {
     jsonBloat: (d) => ({
       id: d.id,
@@ -272,6 +350,15 @@ const dropletList = (ctx: CommandContext) => {
       image: { slug: d.image, distribution: "Ubuntu" },
     }),
   });
+  // Text output looks the same today; next-gen adds a guided next step + the
+  // hint that projection/CSV are available (they are ignored/unsupported today).
+  if (output === "text") {
+    if (ctx.mode === "nextgen") {
+      ctx.append(lines(line(span("Tip: ", "muted"), span("doctl compute droplet list --output csv", "accent"), span(" or ", "muted"), span("--field name,public_ipv4,status", "accent"), span(" to project columns.", "muted"))));
+    } else {
+      ctx.append(lines(line(span("Notice: ", "warn"), span("--field is ignored for text output, and CSV isn't supported — export means post-processing JSON yourself.", "muted"))));
+    }
+  }
 };
 
 const dropletGet = (ctx: CommandContext) => {
@@ -413,6 +500,12 @@ const computeSSH = (ctx: CommandContext) => {
 
 const sshKeyList = (ctx: CommandContext) => {
   ctx.append(table(["ID", "Name", "Fingerprint"], store.sshKeys.map((k) => [String(k.id), k.name, k.fingerprint])));
+  if (ctx.mode === "nextgen") {
+    const first = store.sshKeys[0];
+    ctx.append(lines(line(span("Use it by name: ", "muted"), span(`doctl compute droplet create web --ssh-keys ${first?.name ?? "<name>"}`, "accent"))));
+  } else {
+    ctx.append(lines(line(span("Notice: ", "warn"), span("--ssh-keys expects an ID or fingerprint (not the name) when creating a droplet.", "muted"))));
+  }
 };
 
 const sizeList = (ctx: CommandContext) => {
@@ -441,7 +534,18 @@ const gpuSizeTable = (ctx: CommandContext) => {
 };
 
 const regionList = (ctx: CommandContext) => {
-  ctx.append(table(["Slug", "Region"], store.regions.map((r) => [r.slug, r.name])));
+  if (ctx.mode === "nextgen") {
+    ctx.append(
+      table(
+        ["Slug", "Region", "Available", "Features"],
+        store.regions.map((r) => [r.slug, r.name, "yes", "backups, ipv6, metadata"]),
+        { highlightColumns: [2] }
+      )
+    );
+    ctx.append(lines(line(span("Filter with ", "muted"), span("doctl compute region list --output csv", "accent"), span(" or ", "muted"), span("--field slug,available", "accent"))));
+  } else {
+    ctx.append(table(["Slug", "Region"], store.regions.map((r) => [r.slug, r.name])));
+  }
 };
 
 const dedicatedGetSizes = (ctx: CommandContext) => {

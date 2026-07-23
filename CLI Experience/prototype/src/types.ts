@@ -138,6 +138,7 @@ export interface OutputEntry {
   type: "output";
   blocks: Block[];
   running: boolean;
+  mode: Mode;
 }
 
 export type Entry = InputEntry | OutputEntry;

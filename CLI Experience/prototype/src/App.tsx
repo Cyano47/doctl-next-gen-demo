@@ -54,13 +54,22 @@ export function App() {
     term.current?.focus();
   };
 
+  // Switching the mode re-runs the last command in the new mode, so flipping
+  // the toggle immediately shows the before/after contrast on the same input.
+  const switchMode = async (next: Mode) => {
+    if (next === mode || busy) return;
+    setMode(next);
+    if (!lastCommand) return;
+    setBusy(true);
+    await term.current?.run(lastCommand, next);
+    setBusy(false);
+    term.current?.focus();
+  };
+
   const replayInOtherMode = async () => {
     if (!lastCommand) return;
     const other: Mode = mode === "nextgen" ? "today" : "nextgen";
-    setMode(other);
-    setBusy(true);
-    await term.current?.run(lastCommand, other);
-    setBusy(false);
+    await switchMode(other);
   };
 
   return (
@@ -82,13 +91,15 @@ export function App() {
           <div className="mode-toggle" role="tablist" aria-label="Experience mode">
             <button
               className={"mode-opt" + (mode === "today" ? " active today" : "")}
-              onClick={() => setMode("today")}
+              disabled={busy}
+              onClick={() => void switchMode("today")}
             >
               Today
             </button>
             <button
               className={"mode-opt" + (mode === "nextgen" ? " active next" : "")}
-              onClick={() => setMode("nextgen")}
+              disabled={busy}
+              onClick={() => void switchMode("nextgen")}
             >
               Next-gen
             </button>

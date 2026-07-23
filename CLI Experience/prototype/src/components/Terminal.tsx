@@ -66,7 +66,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(function Termi
       setEntries((prev) => [
         ...prev,
         { id: inputId, type: "input", prompt: "~", command: cmd, mode: activeMode },
-        { id: outId, type: "output", blocks: [], running: true },
+        { id: outId, type: "output", blocks: [], running: true, mode: activeMode },
       ]);
       setBusy(true);
 
@@ -210,7 +210,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(function Termi
       <div className="scroll">
         {entries.map((entry) =>
           entry.type === "input" ? (
-            <div key={entry.id} className="input-echo">
+            <div key={entry.id} className={"input-echo" + (entry.mode === "today" ? " mono" : "")}>
               <span className="ps1">
                 <span className="ps1-ctx">{entry.mode === "today" ? "doctl@today" : "doctl@2.0"}</span>
                 <span className="ps1-sep"> </span>
@@ -220,7 +220,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(function Termi
               <span className="cmd-text">{entry.command}</span>
             </div>
           ) : (
-            <div key={entry.id} className="output">
+            <div key={entry.id} className={"output" + (entry.mode === "today" ? " mono" : "")}>
               {entry.blocks.map((b, i) => (
                 <BlockView key={i} block={b} onChoose={(c) => onChoose(entry.id, i, c)} />
               ))}
@@ -230,7 +230,7 @@ export const Terminal = forwardRef<TerminalHandle, TerminalProps>(function Termi
         <div ref={bottomRef} />
       </div>
 
-      <div className="prompt-row">
+      <div className={"prompt-row" + (mode === "today" ? " mono" : "")}>
         <span className="ps1">
           <span className="ps1-ctx">{mode === "today" ? "doctl@today" : "doctl@2.0"}</span>
           <span className="ps1-sep"> </span>
