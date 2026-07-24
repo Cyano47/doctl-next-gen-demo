@@ -350,6 +350,10 @@ const helpHandler = (ctx: CommandContext) => {
   );
 };
 
+// Mock auth contexts backing the `doctl auth` subcommands.
+const authContexts = ["default", "team-acme"];
+let currentContext = "default";
+
 const authInit = async (ctx: CommandContext) => {
   ctx.append(text("Please authenticate doctl by visiting:"));
   ctx.append(lines(line(span("  https://cloud.digitalocean.com/account/api/tokens?ctx=cli", "accent"))));
@@ -376,6 +380,40 @@ const authInit = async (ctx: CommandContext) => {
   } else {
     ctx.append(lines(line(span("Validating token... ", "muted"), span("OK", "success"))));
   }
+};
+
+const authList = (ctx: CommandContext) => {
+  // Real `doctl auth list` prints one context per line, marking the active one.
+  ctx.append(lines(...authContexts.map((c) => line(span(c + (c === currentContext ? " (current)" : ""))))));
+};
+
+const authSwitch = (ctx: CommandContext) => {
+  const target = flagStr(ctx.parsed.flags, "context") || ctx.parsed.positionals[0];
+  if (!target) {
+    return ctx.append(ctx.mode === "nextgen" ? teachError({ title: "missing --context", suggestions: [{ text: "List contexts", command: "doctl auth list" }] }) : todayError('Error: required flag(s) "context" not set'));
+  }
+  if (!authContexts.includes(target)) {
+    return ctx.append(ctx.mode === "nextgen" ? teachError({ title: `context "${target}" not found`, suggestions: [{ text: "List contexts", command: "doctl auth list" }] }) : todayError(`Error: context ${target} does not exist`));
+  }
+  currentContext = target;
+  ctx.append(text(`Now using context [${target}] by default`));
+};
+
+const authToken = (ctx: CommandContext) => {
+  // The raw API token for the active context. Deliberately a non-conforming
+  // placeholder (not 64 hex) so secret scanners don't flag this mock demo.
+  ctx.append(text("dop_v1_example-token-not-a-real-secret"));
+};
+
+const authRemove = (ctx: CommandContext) => {
+  const target = flagStr(ctx.parsed.flags, "context") || ctx.parsed.positionals[0];
+  if (!target) {
+    return ctx.append(ctx.mode === "nextgen" ? teachError({ title: "missing --context" }) : todayError('Error: required flag(s) "context" not set'));
+  }
+  if (target === currentContext) {
+    return ctx.append(ctx.mode === "nextgen" ? teachError({ title: `cannot remove the current context "${target}"`, suggestions: [{ text: "Switch first", command: "doctl auth switch --context <other>" }] }) : todayError(`Error: cannot delete the current authentication context`));
+  }
+  ctx.append(text(`Removed context [${target}]`));
 };
 
 const accountGet = (ctx: CommandContext) => {
@@ -986,7 +1024,17 @@ export const commandTree: CommandNode = {
   children: [
     { name: "help", summary: "Show help", handler: helpHandler },
     { name: "version", summary: "Show version", handler: (ctx) => ctx.append(text("doctl version 2.0.0-nextgen (mock)")) },
-    { name: "auth", summary: "Authenticate", children: [{ name: "init", summary: "Authenticate doctl", handler: authInit }] },
+    {
+      name: "auth",
+      summary: "Display commands for authenticating doctl with an account",
+      children: [
+        { name: "init", summary: "Initialize doctl to use a specific account", handler: authInit, flags: [{ name: "context", value: "<name>", desc: "Authentication context name" }] },
+        { name: "list", aliases: ["ls"], summary: "List available authentication contexts", handler: authList },
+        { name: "remove", summary: "Remove authentication contexts", handler: authRemove, flags: [{ name: "context", value: "<name>", desc: "Authentication context name" }] },
+        { name: "switch", summary: "Switch between authentication contexts", handler: authSwitch, flags: [{ name: "context", value: "<name>", desc: "Authentication context name" }] },
+        { name: "token", summary: "Display current authentication context API token", handler: authToken },
+      ],
+    },
     { name: "account", summary: "Account", children: [{ name: "get", summary: "Get account info", handler: accountGet }] },
     { name: "balance", summary: "Display commands for retrieving your account balance", children: [{ name: "get", summary: "Retrieve your account balance", handler: balanceGet }] },
     {
