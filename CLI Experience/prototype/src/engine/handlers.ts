@@ -111,7 +111,7 @@ function emitList(ctx: CommandContext, records: any[], allCols: Col[], opts?: { 
   }
   if (output === "csv") {
     if (ctx.mode !== "nextgen") {
-      ctx.append(teachError({ title: "unknown output format \"csv\"", cause: "Today doctl supports only text, json, and yaml." }));
+      ctx.append(todayError('Error: unknown output format "csv"'));
       return;
     }
     const header = cols.map((c) => c.header).join(",");
@@ -119,8 +119,8 @@ function emitList(ctx: CommandContext, records: any[], allCols: Col[], opts?: { 
     ctx.append(code("csv", `${header}\n${body}`));
     return;
   }
-  // text table
-  ctx.append(table(cols.map((c) => c.header.toUpperCase()), records.map((r) => cols.map((c) => c.get(r)))));
+  // text table — real doctl uses exact-case headers, not uppercased.
+  ctx.append(table(cols.map((c) => c.header), records.map((r) => cols.map((c) => c.get(r)))));
 }
 
 function rowObj(r: any, cols: Col[]) {
@@ -145,6 +145,7 @@ function toYaml(arr: any[]): string {
 // -------------------------------------------------------------------------
 // Column definitions
 // -------------------------------------------------------------------------
+// Next-gen keeps a curated, readable subset of columns.
 const dropletCols: Col[] = [
   { header: "ID", key: "id", get: (d) => String(d.id) },
   { header: "Name", key: "name", get: (d) => d.name },
@@ -154,42 +155,137 @@ const dropletCols: Col[] = [
   { header: "Status", key: "status", get: (d) => d.status },
 ];
 
+// ---- derived fields for the full "today" column set ---------------------
+function diskFor(size: string): number {
+  const s = store.sizes.find((x) => x.slug === size);
+  if (s) return s.diskGb;
+  return store.gpuSizes.find((g) => g.slug === size) ? 720 : 25;
+}
+function imageName(slug: string): string {
+  const i = store.images.find((x) => x.slug === slug);
+  return i ? `${i.distribution} ${i.name}` : slug;
+}
+function privateIp(id: number): string {
+  return `10.124.0.${(id % 250) + 2}`;
+}
+const VPC_BY_REGION: Record<string, string> = {
+  nyc1: "3cfbc22a-bf58-49d8-b13a-1168846f272e",
+  nyc2: "9b1f0c2d-7e34-4a1b-8c5f-2d3e4f5a6b7c",
+  nyc3: "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+  sfo3: "6d5e4c3b-2a19-4f8e-9d7c-0b1a2c3d4e5f",
+  ams3: "7c8d9e0f-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+};
+function vpcFor(region: string): string {
+  return VPC_BY_REGION[region] ?? "00000000-0000-4000-8000-000000000000";
+}
+
+// Real `doctl compute droplet list` — the full, wide, exact-case column set.
+const dropletColsToday: Col[] = [
+  { header: "ID", key: "id", get: (d) => String(d.id) },
+  { header: "Name", key: "name", get: (d) => d.name },
+  { header: "Public IPv4", key: "public_ipv4", get: (d) => d.ip },
+  { header: "Private IPv4", key: "private_ipv4", get: (d) => privateIp(d.id) },
+  { header: "Public IPv6", key: "public_ipv6", get: () => "" },
+  { header: "Memory", key: "memory", get: (d) => String(d.memoryMb) },
+  { header: "VCPUs", key: "vcpus", get: (d) => String(d.vcpus) },
+  { header: "Disk", key: "disk", get: (d) => String(diskFor(d.size)) },
+  { header: "Region", key: "region", get: (d) => d.region },
+  { header: "Image", key: "image", get: (d) => imageName(d.image) },
+  { header: "VPC UUID", key: "vpc_uuid", get: (d) => vpcFor(d.region) },
+  { header: "Status", key: "status", get: (d) => d.status },
+  { header: "Tags", key: "tags", get: () => "" },
+  { header: "Features", key: "features", get: () => "droplet_agent,private_networking" },
+  { header: "Volumes", key: "volumes", get: () => "" },
+];
+
+// Real `doctl databases list` storage column (MiB), keyed by slug.
+function dbStorageMiB(size: string): number {
+  const map: Record<string, number> = {
+    "db-s-1vcpu-1gb": 10240,
+    "db-s-1vcpu-2gb": 30720,
+    "db-s-2vcpu-4gb": 61440,
+    "db-s-4vcpu-8gb": 115712,
+  };
+  return map[size] ?? 10240;
+}
+
 // -------------------------------------------------------------------------
 // Handlers
 // -------------------------------------------------------------------------
 
+// TODAY: reproduce the real `doctl` root help verbatim — plain, monochrome,
+// two-column (name padded, then description), no boxes. This is the authentic
+// "before" that the next-gen experience is measured against.
+const renderTodayRootHelp = (ctx: CommandContext) => {
+  const W = 20; // command-name column width (matches real doctl alignment)
+  const row = (name: string, desc: string) =>
+    line(span("  " + name.padEnd(W) + " " + desc));
+
+  ctx.append(
+    lines(
+      line(span("doctl is a command line interface (CLI) for the DigitalOcean API.")),
+      blank(),
+      line(span("Usage:")),
+      line(span("  doctl [command]")),
+      blank(),
+      line(span("Manage DigitalOcean Resources:")),
+      row("1-click", "Display commands that pertain to 1-click applications"),
+      row("account", "Display commands that retrieve account details"),
+      row("apps", "Displays commands for working with apps"),
+      row("compute", "Display commands that manage infrastructure"),
+      row("databases", "Display commands that manage databases"),
+      row("dedicated-inference", "Display commands for managing dedicated inference endpoints"),
+      row("gradient", "Manage Gradient AI resources"),
+      row("kubernetes", "Displays commands to manage Kubernetes clusters and configurations"),
+      row("monitoring", "Display commands to manage monitoring"),
+      row("network", "Display commands that manage network products"),
+      row("nfs", "Display commands to manage network file storage"),
+      row("projects", "Manage projects and assign resources to them"),
+      row("registries", "Display commands for working with multiple container registries"),
+      row("registry", "Display commands for working with container registries"),
+      row("security", "Display commands to manage CSPM scans"),
+      row("serverless", "Develop, test, and deploy serverless functions"),
+      row("spaces", "Display commands that manage DigitalOcean Spaces."),
+      row("vector-databases", "Display commands that manage vector databases"),
+      row("vpcs", "Display commands that manage VPCs"),
+      blank(),
+      line(span("Inference:")),
+      row("serverless-inference", "Call DigitalOcean serverless inference APIs"),
+      blank(),
+      line(span("Configure doctl:")),
+      row("auth", "Display commands for authenticating doctl with an account"),
+      row("version", "Show the current version"),
+      blank(),
+      line(span("View Billing:")),
+      row("balance", "Display commands for retrieving your account balance"),
+      row("billing-history", "Display commands for retrieving your billing history"),
+      row("invoice", "Display commands for retrieving invoices for your account"),
+      blank(),
+      line(span("Additional Commands:")),
+      row("completion", "Generate the autocompletion script for the specified shell"),
+      row("help", "Help about any command"),
+      blank(),
+      line(span("Flags:")),
+      line(span("  -t, --access-token string   API V2 access token")),
+      line(span("  -u, --api-url string        Override default API endpoint")),
+      line(span("  -c, --config string         Specify a custom config file (default \"$HOME/Library/Application Support/doctl/config.yaml\")")),
+      line(span("      --context string        Specify a custom authentication context name")),
+      line(span("  -h, --help                  help for doctl")),
+      line(span("      --http-retry-max int    Set maximum number of retries for requests that fail with a 429 or 500-level error (default 5)")),
+      line(span("      --interactive           Enable interactive behavior. Defaults to true if the terminal supports it (default true)")),
+      line(span("  -o, --output string         Desired output format [text|json] (default \"text\")")),
+      line(span("      --trace                 Show a log of network activity while performing a command")),
+      line(span("  -v, --verbose               Enable verbose output")),
+      blank(),
+      line(span("Use \"doctl [command] --help\" for more information about a command.")),
+    )
+  );
+};
+
 const rootHandler = (ctx: CommandContext) => {
-  // TODAY: the plain, unstyled v1.x root output — a wall of commands, no
-  // guidance, no AI surface. This is the "before".
+  // TODAY: the real doctl root help — a plain wall of commands, no guidance.
   if (ctx.mode !== "nextgen") {
-    ctx.append(
-      lines(
-        line(span("doctl is a command line interface (CLI) for the DigitalOcean API.")),
-        blank(),
-        line(span("Usage:", "muted")),
-        line(span("  doctl [command]")),
-        blank(),
-        line(span("Available Commands:", "muted")),
-        line(span("  account        Display commands that retrieve account details")),
-        line(span("  apps           Display commands for working with apps")),
-        line(span("  auth           Display commands for authenticating doctl with an account")),
-        line(span("  balance        Display commands for retrieving your account balance")),
-        line(span("  compute        Display commands that manage infrastructure")),
-        line(span("  databases      Display commands that manage databases")),
-        line(span("  kubernetes     Displays commands to manage Kubernetes clusters and configurations")),
-        line(span("  projects       Manage projects and assign resources to them")),
-        line(span("  registry       Display commands for working with container registries")),
-        line(span("  version        Show the current version")),
-        blank(),
-        line(span("Flags:", "muted")),
-        line(span("  -t, --access-token string   API V2 access token")),
-        line(span("  -c, --config string         Specify a custom config file")),
-        line(span("  -o, --output string         Desired output format [text|json] (default \"text\")")),
-        line(span("  -v, --verbose               Enable verbose output")),
-        blank(),
-        line(span("Use \"doctl [command] --help\" for more information about a command.", "muted")),
-      )
-    );
+    renderTodayRootHelp(ctx);
     return;
   }
   // NEXT-GEN: a welcoming, opinionated first run.
@@ -212,38 +308,9 @@ const rootHandler = (ctx: CommandContext) => {
 };
 
 const helpHandler = (ctx: CommandContext) => {
-  // TODAY: plain namespace listing. No AI namespace, no agent surface,
-  // no --describe. GenAI lives under a separate, non-obvious command.
+  // TODAY: `doctl help` prints the same root help as `doctl` — reproduce it.
   if (ctx.mode !== "nextgen") {
-    ctx.append(
-      lines(
-        line(span("doctl", "default", { bold: true }), span(" is the command line for DigitalOcean.")),
-        blank(),
-        line(span("USAGE", "muted", { bold: true })),
-        line(span("  doctl [command] [flags]")),
-        blank(),
-        line(span("CORE", "muted", { bold: true }))
-      )
-    );
-    ctx.append(
-      table(
-        ["NAMESPACE", "DESCRIPTION"],
-        [
-          ["compute", "Droplets, SSH keys, sizes, regions, snapshots"],
-          ["apps", "App Platform: deploy from a spec file, logs"],
-          ["databases", "Managed databases: create, connection details"],
-          ["kubernetes", "DOKS clusters and node pools"],
-          ["genai", "Agents (experimental; separate from compute)"],
-          ["auth", "Authenticate and manage contexts"],
-        ]
-      )
-    );
-    ctx.append(
-      lines(
-        blank(),
-        line(span("Use ", "muted"), span("doctl [command] --help", "default"), span(" for more information about a command.", "muted"))
-      )
-    );
+    renderTodayRootHelp(ctx);
     return;
   }
   // NEXT-GEN: guidance-first help with the AI/agent surface front and center.
@@ -328,10 +395,31 @@ const accountGet = (ctx: CommandContext) => {
   }
 };
 
+// ---- balance ------------------------------------------------------------
+const balanceGet = (ctx: CommandContext) => {
+  if (ctx.mode !== "nextgen") {
+    // The raw 403 exactly as today's doctl surfaces it — one line, no guidance.
+    ctx.append(apiError("GET", "customers/my/balance", 403, "You are not authorized to perform this operation"));
+    return;
+  }
+  // Next-gen: the same failure, but the error explains itself and points forward.
+  ctx.append(
+    teachError({
+      title: "Not authorized to read your balance (403)",
+      cause: "Your active context's token doesn't include billing read scope.",
+      suggestions: [
+        { text: "Switch to a context with billing access", command: "doctl auth switch --context <name>" },
+        { text: "Or generate a full-scope token", command: "doctl auth init" },
+      ],
+    })
+  );
+};
+
 // ---- compute droplet ----------------------------------------------------
 const dropletList = (ctx: CommandContext) => {
   const output = flagStr(ctx.parsed.flags, "output", "text");
-  emitList(ctx, store.droplets, dropletCols, {
+  const cols = ctx.mode === "nextgen" ? dropletCols : dropletColsToday;
+  emitList(ctx, store.droplets, cols, {
     jsonBloat: (d) => ({
       id: d.id,
       name: d.name,
@@ -350,20 +438,15 @@ const dropletList = (ctx: CommandContext) => {
       image: { slug: d.image, distribution: "Ubuntu" },
     }),
   });
-  // Text output looks the same today; next-gen adds a guided next step + the
-  // hint that projection/CSV are available (they are ignored/unsupported today).
-  if (output === "text") {
-    if (ctx.mode === "nextgen") {
-      ctx.append(lines(line(span("Tip: ", "muted"), span("doctl compute droplet list --output csv", "accent"), span(" or ", "muted"), span("--field name,public_ipv4,status", "accent"), span(" to project columns.", "muted"))));
-    } else {
-      ctx.append(lines(line(span("Notice: ", "warn"), span("--field is ignored for text output, and CSV isn't supported — export means post-processing JSON yourself.", "muted"))));
-    }
+  // Today prints only the table. Next-gen adds a guided projection tip.
+  if (output === "text" && ctx.mode === "nextgen") {
+    ctx.append(lines(line(span("Tip: ", "muted"), span("doctl compute droplet list --output csv", "accent"), span(" or ", "muted"), span("--field name,public_ipv4,status", "accent"), span(" to project columns.", "muted"))));
   }
 };
 
 const dropletGet = (ctx: CommandContext) => {
   const ref = ctx.parsed.positionals[0];
-  if (!ref) return ctx.append(teachError({ title: "missing droplet name or ID", suggestions: [{ text: "List your droplets", command: "doctl compute droplet list" }] }));
+  if (!ref) return ctx.append(ctx.mode === "nextgen" ? teachError({ title: "missing droplet name or ID", suggestions: [{ text: "List your droplets", command: "doctl compute droplet list" }] }) : missingArgs("droplet.get"));
   const d = store.findDroplet(ref);
   if (!d) return notFound(ctx, "Droplet", ref, "doctl compute droplet list");
   ctx.append(table(["ID", "Name", "Public IPv4", "Region", "Size", "Status"], [[String(d.id), d.name, d.ip, d.region, d.size, d.status]]));
@@ -372,7 +455,7 @@ const dropletGet = (ctx: CommandContext) => {
 
 const dropletCreate = async (ctx: CommandContext) => {
   const names = ctx.parsed.positionals;
-  if (!names.length) return ctx.append(teachError({ title: "missing droplet name", cause: "Usage: doctl compute droplet create <name>... [flags]" }));
+  if (!names.length) return ctx.append(ctx.mode === "nextgen" ? teachError({ title: "missing droplet name", cause: "Usage: doctl compute droplet create <name>... [flags]" }) : missingArgs("droplet.create"));
   const region = flagStr(ctx.parsed.flags, "region", "nyc1");
   const size = flagStr(ctx.parsed.flags, "size", "s-1vcpu-1gb");
   const image = flagStr(ctx.parsed.flags, "image", "ubuntu-24-04-x64");
@@ -454,7 +537,7 @@ const dropletCreate = async (ctx: CommandContext) => {
 
 const dropletDelete = async (ctx: CommandContext) => {
   const ref = ctx.parsed.positionals[0];
-  if (!ref) return ctx.append(teachError({ title: "missing droplet name or ID" }));
+  if (!ref) return ctx.append(ctx.mode === "nextgen" ? teachError({ title: "missing droplet name or ID" }) : missingArgs("droplet.delete"));
   const d = store.findDroplet(ref);
   if (!d) return notFound(ctx, "Droplet", ref, "doctl compute droplet list");
 
@@ -601,12 +684,22 @@ const appsCreate = async (ctx: CommandContext) => {
 };
 
 const appsList = (ctx: CommandContext) => {
+  if (ctx.mode !== "nextgen") {
+    // Real `doctl apps list` columns. Deployment IDs / timestamps are derived.
+    ctx.append(
+      table(
+        ["ID", "Spec Name", "Default Ingress", "Active Deployment ID", "In Progress Deployment ID", "Created At", "Updated At"],
+        store.apps.map((a) => [a.id, a.name, a.url, a.id.replace(/^app-/, ""), "", "2026-06-02 09:14:22 +0000 UTC", "2026-07-20 11:02:51 +0000 UTC"])
+      )
+    );
+    return;
+  }
   ctx.append(table(["ID", "Name", "URL", "Tier", "Status"], store.apps.map((a) => [a.id.slice(0, 12) + "…", a.name, a.url, a.tier, a.status])));
 };
 const appsGet = (ctx: CommandContext) => {
   const ref = ctx.parsed.positionals[0];
   if (ctx.mode !== "nextgen" && store.apps.find((a) => a.name === ref)) {
-    return ctx.append(todayError(`GET https://api.digitalocean.com/v2/apps/${ref}: 404 (request "a1b2") app not found`, "a1b2c3d4"));
+    return ctx.append(apiError("GET", `apps/${ref}`, 404, "app not found"));
   }
   const a = ref ? store.findApp(ref) : undefined;
   if (!a) return notFound(ctx, "App", ref ?? "", "doctl apps list");
@@ -640,7 +733,7 @@ const appsPropose = (ctx: CommandContext) => {
 // ---- databases ----------------------------------------------------------
 const dbCreate = async (ctx: CommandContext) => {
   const name = ctx.parsed.positionals[0];
-  if (!name) return ctx.append(teachError({ title: "missing database cluster name" }));
+  if (!name) return ctx.append(ctx.mode === "nextgen" ? teachError({ title: "missing database cluster name" }) : missingArgs("databases.create"));
   const engine = flagStr(ctx.parsed.flags, "engine", "pg");
   const version = flagStr(ctx.parsed.flags, "version", "16");
   const size = flagStr(ctx.parsed.flags, "size", "db-s-1vcpu-1gb");
@@ -667,12 +760,22 @@ const dbCreate = async (ctx: CommandContext) => {
   }
 };
 const dbList = (ctx: CommandContext) => {
+  if (ctx.mode !== "nextgen") {
+    // Real `doctl databases list` columns, full IDs, exact case.
+    ctx.append(
+      table(
+        ["ID", "Name", "Engine", "Version", "Number of Nodes", "Region", "Status", "Size", "Storage (MiB)"],
+        store.databases.map((d) => [d.id, d.name, d.engine, d.version, String(d.numNodes), d.region, d.status, d.size, String(dbStorageMiB(d.size))])
+      )
+    );
+    return;
+  }
   ctx.append(table(["ID", "Name", "Engine", "Region", "Status"], store.databases.map((d) => [d.id.slice(0, 12) + "…", d.name, `${d.engine} ${d.version}`, d.region, d.status])));
 };
 const dbGet = (ctx: CommandContext) => {
   const ref = ctx.parsed.positionals[0];
   if (ctx.mode !== "nextgen" && store.databases.find((d) => d.name === ref)) {
-    return ctx.append(todayError(`GET https://api.digitalocean.com/v2/databases/${ref}: 404 (request "9f2a") cluster not found`, "9f2a1c74"));
+    return ctx.append(apiError("GET", `databases/${ref}`, 404, "cluster not found"));
   }
   const d = ref ? store.findDatabase(ref) : undefined;
   if (!d) return notFound(ctx, "Database cluster", ref ?? "", "doctl databases list");
@@ -682,7 +785,7 @@ const dbConnection = (ctx: CommandContext) => {
   const ref = ctx.parsed.positionals[0];
   if (ctx.mode !== "nextgen") {
     if (store.databases.find((d) => d.name === ref)) {
-      return ctx.append(todayError(`GET https://api.digitalocean.com/v2/databases/${ref}: 404 (request "9f2a") cluster not found`, "9f2a1c74"));
+      return ctx.append(apiError("GET", `databases/${ref}`, 404, "cluster not found"));
     }
     const d = ref ? store.findDatabase(ref) : undefined;
     if (!d) return notFound(ctx, "Database cluster", ref ?? "", "doctl databases list");
@@ -703,7 +806,7 @@ const dbConnection = (ctx: CommandContext) => {
 // ---- kubernetes ---------------------------------------------------------
 const k8sCreate = async (ctx: CommandContext) => {
   const name = ctx.parsed.positionals[0];
-  if (!name) return ctx.append(teachError({ title: "missing cluster name" }));
+  if (!name) return ctx.append(ctx.mode === "nextgen" ? teachError({ title: "missing cluster name" }) : missingArgs("kubernetes.cluster.create"));
   const region = flagStr(ctx.parsed.flags, "region", "nyc1");
   const wait = flagBool(ctx.parsed.flags, "wait");
   if (wait) {
@@ -735,7 +838,7 @@ const agentCreate = async (ctx: CommandContext) => {
   const model = flagStr(ctx.parsed.flags, "model", "llama3-8b-instruct");
   if (!name) {
     if (ctx.mode === "nextgen") return ctx.append(teachError({ title: "missing --name", cause: "An agent needs a name and a model.", suggestions: [{ text: "Example", command: "doctl gradient agent create --name support-bot --model llama3-70b-instruct" }] }));
-    return ctx.append(todayError('{"error":"invalid","messages":{"base":["7648b7ff"]}}'));
+    return ctx.append(todayError('Error: required flag(s) "name" not set'));
   }
   if (ctx.mode === "nextgen") await runProgress(ctx, `Creating agent ${name}`, [{ label: "Reserving inference capacity", ms: 900 }, { label: `Loading ${model}`, ms: 1200 }, { label: "Exposing endpoint", ms: 700 }]);
   const a = store.createAgent({ name, model });
@@ -746,7 +849,7 @@ const agentChat = async (ctx: CommandContext) => {
   const ref = ctx.parsed.positionals[0];
   const msg = flagStr(ctx.parsed.flags, "message") || flagStr(ctx.parsed.flags, "prompt") || ctx.parsed.positionals.slice(1).join(" ");
   if (ctx.mode !== "nextgen") {
-    return ctx.append(teachError({ title: "unknown command \"chat\" for \"doctl gradient agent\"", cause: "Today you can manage agents but not talk to them — there is no chat/invoke/run verb." }));
+    return ctx.append(unknownCommand("chat", "doctl gradient agent"));
   }
   const a = ref ? store.findAgent(ref) : undefined;
   if (!a) return notFound(ctx, "Agent", ref ?? "", "doctl gradient agent list");
@@ -761,6 +864,8 @@ const agentChat = async (ctx: CommandContext) => {
 
 // ---- doctl ask (NL → command, HITL) -------------------------------------
 const askHandler = (ctx: CommandContext) => {
+  // `doctl ask` is a next-gen surface; today there is no such command.
+  if (ctx.mode !== "nextgen") return ctx.append(unknownCommand("ask", "doctl"));
   const prompt = ctx.parsed.positionals.join(" ").trim();
   if (!prompt) return ctx.append(teachError({ title: "ask what?", suggestions: [{ text: "Try", command: 'doctl ask "deploy my node app from github"' }] }));
   const suggestion = intentToCommand(prompt);
@@ -805,7 +910,7 @@ function intentToCommand(prompt: string): { command: string; note?: string } {
 
 // ---- rollback -----------------------------------------------------------
 const rollbackHandler = async (ctx: CommandContext) => {
-  if (ctx.mode !== "nextgen") return ctx.append(teachError({ title: "unknown command \"rollback\"", cause: "There is no rollback in doctl today." }));
+  if (ctx.mode !== "nextgen") return ctx.append(unknownCommand("rollback", "doctl"));
   const last = store.droplets[store.droplets.length - 1];
   await runProgress(ctx, "Rolling back last operation", [{ label: "Locating last mutation", ms: 500 }, { label: last ? `Destroying ${last.name}` : "Reverting", ms: 800 }]);
   if (last) store.deleteDroplet(last.name);
@@ -814,7 +919,7 @@ const rollbackHandler = async (ctx: CommandContext) => {
 
 // ---- mcp serve ----------------------------------------------------------
 const mcpServe = async (ctx: CommandContext) => {
-  if (ctx.mode !== "nextgen") return ctx.append(teachError({ title: "unknown command \"mcp\"", cause: "doctl ships no MCP server today; the external one is a partial mirror." }));
+  if (ctx.mode !== "nextgen") return ctx.append(unknownCommand("mcp", "doctl"));
   ctx.append(lines(line(span("Starting doctl MCP server (in-binary)…", "muted"))));
   await ctx.sleep(500);
   ctx.append(panel("agent", [
@@ -828,24 +933,47 @@ const mcpServe = async (ctx: CommandContext) => {
 };
 
 // ---- shared error helpers ----------------------------------------------
+// Real doctl surfaces API failures as a single stderr line, prefixed with
+// "Error: ", carrying the HTTP verb, URL, status, a full request UUID, and the
+// server message — no hint, no suggestion. These helpers reproduce that shape.
+function ridUUID(): string {
+  const c = (globalThis as any).crypto;
+  if (c?.randomUUID) return c.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (ch) => {
+    const r = (Math.random() * 16) | 0;
+    return (ch === "x" ? r : (r & 0x3) | 0x8).toString(16);
+  });
+}
+function apiError(method: string, path: string, status: number, message: string) {
+  return todayError(`Error: ${method} https://api.digitalocean.com/v2/${path}: ${status} (request "${ridUUID()}") ${message}`);
+}
+// cobra's "missing required arguments" error uses the dotted command path.
+function missingArgs(cmdPath: string) {
+  return todayError(`Error: (${cmdPath}) command is missing required arguments`);
+}
+// cobra's unknown-subcommand / unknown-command error.
+function unknownCommand(sub: string, parent: string) {
+  return todayError(`Error: unknown command "${sub}" for "${parent}"`);
+}
+
 function notFound(ctx: CommandContext, kind: string, ref: string, listCmd: string) {
   if (ctx.mode === "nextgen") {
     ctx.append(teachError({ title: `${kind} '${ref}' not found`, suggestions: [{ text: `See available ${kind.toLowerCase()}s`, command: listCmd }] }));
   } else {
-    ctx.append(todayError(`GET https://api.digitalocean.com/v2/...: 404 (request "ab12") not found`, "ab12cd34"));
+    ctx.append(apiError("GET", "droplets/" + encodeURIComponent(ref || ""), 404, "The resource you requested could not be found."));
   }
 }
 function badRegion(ctx: CommandContext, region: string) {
   if (ctx.mode === "nextgen") ctx.append(teachError({ title: `Region '${region}' not found`, cause: "That region slug doesn't exist or isn't available to your account.", suggestions: [{ text: "List valid regions", command: "doctl compute region list" }] }));
-  else ctx.append(todayError("POST https://api.digitalocean.com/v2/droplets: 422 (request \"c4f1\") There are no regions available that match your request", "c4f1a2b3"));
+  else ctx.append(apiError("POST", "droplets", 422, "There are no regions available that match your request"));
 }
 function badImage(ctx: CommandContext, image: string) {
   if (ctx.mode === "nextgen") ctx.append(teachError({ title: `Image '${image}' not found`, suggestions: [{ text: "List public images", command: "doctl compute image list --public" }] }));
-  else ctx.append(todayError("POST https://api.digitalocean.com/v2/droplets: 404 (request \"d5g2\") image not found", "d5g2b3c4"));
+  else ctx.append(apiError("POST", "droplets", 404, "image not found"));
 }
 function badSize(ctx: CommandContext, size: string) {
   if (ctx.mode === "nextgen") ctx.append(teachError({ title: `Size '${size}' not found`, suggestions: [{ text: "List sizes", command: "doctl compute size list" }, { text: "List GPU sizes", command: "doctl compute size list --gpu" }] }));
-  else ctx.append(todayError("POST https://api.digitalocean.com/v2/droplets: 422 (request \"e6h3\") invalid size", "e6h3c4d5"));
+  else ctx.append(apiError("POST", "droplets", 422, "invalid size"));
 }
 
 // -------------------------------------------------------------------------
@@ -860,6 +988,7 @@ export const commandTree: CommandNode = {
     { name: "version", summary: "Show version", handler: (ctx) => ctx.append(text("doctl version 2.0.0-nextgen (mock)")) },
     { name: "auth", summary: "Authenticate", children: [{ name: "init", summary: "Authenticate doctl", handler: authInit }] },
     { name: "account", summary: "Account", children: [{ name: "get", summary: "Get account info", handler: accountGet }] },
+    { name: "balance", summary: "Display commands for retrieving your account balance", children: [{ name: "get", summary: "Retrieve your account balance", handler: balanceGet }] },
     {
       name: "compute",
       summary: "Droplets and related resources",

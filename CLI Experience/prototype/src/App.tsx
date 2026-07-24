@@ -26,18 +26,32 @@ function Logo() {
 }
 
 export function App() {
-  const term = useRef<TerminalHandle>(null);
+  // Two fully independent flows — one per mode. Both stay mounted and keep
+  // their own history/scroll; the toggle just reveals one or the other.
+  const todayRef = useRef<TerminalHandle>(null);
+  const nextRef = useRef<TerminalHandle>(null);
   const [mode, setMode] = useState<Mode>("nextgen");
   const [lastCommand, setLastCommand] = useState<string>("");
   const [persona, setPersona] = useState<Persona | "All">("All");
   const [busy, setBusy] = useState(false);
   const bootRef = useRef(false);
 
+  const refFor = (m: Mode) => (m === "today" ? todayRef : nextRef);
+  const activeRef = () => refFor(mode);
+
   useEffect(() => {
     if (bootRef.current) return;
     bootRef.current = true;
-    void term.current?.run("doctl");
+    // Seed each flow with its own first-run help.
+    void todayRef.current?.run("doctl");
+    void nextRef.current?.run("doctl");
   }, []);
+
+  // Focus the active flow's input whenever the toggle switches screens.
+  useEffect(() => {
+    activeRef().current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   const tours = useMemo(
     () => (persona === "All" ? TOURS : TOURS.filter((t) => t.persona === persona)),
@@ -45,31 +59,29 @@ export function App() {
   );
 
   const runTour = async (steps: string[]) => {
+    const ref = activeRef();
     setBusy(true);
     for (const step of steps) {
-      await term.current?.run(step);
+      await ref.current?.run(step);
       await new Promise((r) => setTimeout(r, 550));
     }
     setBusy(false);
-    term.current?.focus();
+    ref.current?.focus();
   };
 
-  // Switching the mode re-runs the last command in the new mode, so flipping
-  // the toggle immediately shows the before/after contrast on the same input.
-  const switchMode = async (next: Mode) => {
-    if (next === mode || busy) return;
+  // Toggling simply switches which flow is on screen — no re-running, no mixing.
+  const switchMode = (next: Mode) => {
+    if (next === mode) return;
     setMode(next);
-    if (!lastCommand) return;
-    setBusy(true);
-    await term.current?.run(lastCommand, next);
-    setBusy(false);
-    term.current?.focus();
   };
 
+  // Replay the last command from the current flow into the other flow, then
+  // switch to it — an explicit way to line up a before/after.
   const replayInOtherMode = async () => {
     if (!lastCommand) return;
     const other: Mode = mode === "nextgen" ? "today" : "nextgen";
-    await switchMode(other);
+    setMode(other);
+    await refFor(other).current?.run(lastCommand);
   };
 
   return (
@@ -91,15 +103,13 @@ export function App() {
           <div className="mode-toggle" role="tablist" aria-label="Experience mode">
             <button
               className={"mode-opt" + (mode === "today" ? " active today" : "")}
-              disabled={busy}
-              onClick={() => void switchMode("today")}
+              onClick={() => switchMode("today")}
             >
               Today
             </button>
             <button
               className={"mode-opt" + (mode === "nextgen" ? " active next" : "")}
-              disabled={busy}
-              onClick={() => void switchMode("nextgen")}
+              onClick={() => switchMode("nextgen")}
             >
               Next-gen
             </button>
@@ -107,14 +117,14 @@ export function App() {
           <button className="ghost-btn" disabled={!lastCommand || busy} onClick={replayInOtherMode}>
             ⇄ Replay in {mode === "nextgen" ? "Today" : "Next-gen"}
           </button>
-          <button className="ghost-btn" onClick={() => term.current?.clear()}>
+          <button className="ghost-btn" onClick={() => activeRef().current?.clear()}>
             Clear
           </button>
           <button
             className="ghost-btn"
             onClick={() => {
-              term.current?.reset();
-              void term.current?.run("doctl");
+              activeRef().current?.reset();
+              void activeRef().current?.run("doctl");
             }}
           >
             Reset
@@ -170,7 +180,7 @@ export function App() {
                   key={q.label}
                   className="quick"
                   disabled={busy}
-                  onClick={() => void term.current?.run(q.cmd)}
+                  onClick={() => void activeRef().current?.run(q.cmd)}
                 >
                   {q.label}
                 </button>
@@ -186,13 +196,19 @@ export function App() {
               <span className="dot today" /> Today: doctl v1.155.0 behavior
             </div>
             <div className="legend-note">
-              Tip: toggle the mode and hit <b>Replay</b> to show before/after on the same command.
+              Today and Next-gen are separate screens — switch with the toggle. Hit <b>Replay</b> to
+              run your last command in the other screen.
             </div>
           </div>
         </aside>
 
         <main className="main">
-          <Terminal ref={term} mode={mode} onCommand={setLastCommand} />
+          <div className={"term-view" + (mode === "today" ? " show" : " hide")}>
+            <Terminal ref={todayRef} mode="today" onCommand={setLastCommand} />
+          </div>
+          <div className={"term-view" + (mode === "nextgen" ? " show" : " hide")}>
+            <Terminal ref={nextRef} mode="nextgen" onCommand={setLastCommand} />
+          </div>
         </main>
       </div>
     </div>

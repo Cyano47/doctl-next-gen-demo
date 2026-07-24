@@ -208,6 +208,7 @@ function Confirm({
         <div className="confirm-resolved">▸ {b.resolvedLabel}</div>
       ) : (
         <div className="confirm-choices">
+          <span className="confirm-marker">❯</span>
           {b.choices.map((c, i) => (
             <button
               key={i}
