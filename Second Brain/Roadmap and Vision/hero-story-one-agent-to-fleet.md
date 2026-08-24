@@ -49,6 +49,8 @@ Later, an agent would be a named machine principal rather than a comment on a to
 
 That is the plain answer to agent-to-agent. When one agent hands work to another, authority only narrows — the second receives less than the first held, for less time, and the chain stays visible. We are not claiming an H2 product. The roadmap gates this: it builds on token governance and short-lived credentials, and demand has to be validated first. Per-agent budgets further depend on near-real-time spend attribution we have not confirmed exists. Until it does, ceilings stay coarse.
 
+This is not only a customer hypothesis. DigitalOcean's own Agent Harness specification already requires a credential vault to broker scoped, single-use handles so an agent pod never sees a raw secret, and records agent-to-agent handoff without creating a child principal or a narrower grant. The authority gap is internal too.
+
 | Stage | Unit of authority | Horizon |
 |---|---|---|
 | 1 | A person's token | Today |
