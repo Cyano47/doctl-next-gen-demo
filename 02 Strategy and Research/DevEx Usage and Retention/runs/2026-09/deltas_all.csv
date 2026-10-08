@@ -1,0 +1,5 @@
+metric_id,dimension,dimension_value,value,prev_month,mom_pct,avg_3mo,vs_3mo_pct
+base_churn.active,all,all,692622.0,690891.0,0.3,693408.33,-0.1
+base_churn.gross,all,all,150558261.0,124341625.0,21.1,109017219.33,38.1
+base_churn.net,all,all,94261324.0,79135556.0,19.1,76204317.33,23.7
+base_churn.new_or_returning,all,all,48764.0,42137.0,15.7,45780.0,6.5

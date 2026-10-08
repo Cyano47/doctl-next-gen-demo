@@ -1,0 +1,15 @@
+month,dim,val,tokens,accounts
+2026-01,agent_endpoint_keys,created,6667,351
+2026-02,agent_endpoint_keys,created,12716,501
+2026-03,agent_endpoint_keys,created,3200,618
+2026-04,agent_endpoint_keys,created,1835,652
+2026-05,agent_endpoint_keys,created,1622,599
+2026-06,agent_endpoint_keys,created,1515,495
+2026-07,agent_endpoint_keys,created,1207,424
+2026-08,agent_endpoint_keys,created,530,210
+2026-09,agent_endpoint_keys,created,610,179
+2026-09,token_snapshot,valid_at_month_end,649844,61435
+2026-09,token_snapshot,valid_idle_90d_plus,81545,19295
+2026-09,token_snapshot,valid_never_used,284230,3067
+2026-09,token_snapshot,valid_used_in_month,191545,26096
+2026-09,token_snapshot,valid_used_since_month_start,255913,38585

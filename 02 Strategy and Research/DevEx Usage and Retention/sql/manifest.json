@@ -1,0 +1,88 @@
+{
+  "definition_version": "v1",
+  "results": {
+    "base_churn": {
+      "file": "01_base_tokens.sql",
+      "source": "MFD.INVOICE_ITEMS_NET",
+      "dims": {"name_col": "dim", "value_col": "val"},
+      "metrics": {"active": "accounts", "gross": "usd", "net": "usd", "new_or_returning": "accounts",
+                  "churned": "accounts", "churned_later_returned": "accounts"},
+      "churn_metrics": ["churned", "churned_later_returned"]
+    },
+    "token_created": {
+      "file": "01_base_tokens.sql",
+      "source": "TRANSFORMED_DATA.OAUTH_ACCESS_TOKENS",
+      "dims": {"name": "token_bucket", "value_cols": ["bucket"]},
+      "metrics": {"tokens": "tokens", "accts_created": "accounts", "active_accts_created": "accounts",
+                  "accts_holding_valid": "accounts", "active_accts_holding_valid": "accounts"}
+    },
+    "token_snapshot": {
+      "file": "01_base_tokens.sql",
+      "source": "TRANSFORMED_DATA.OAUTH_ACCESS_TOKENS; GEN_AI_AGENT_API_KEYS",
+      "dims": {"name_col": "dim", "value_col": "val"},
+      "metrics": {"tokens": "tokens", "accounts": "accounts"}
+    },
+    "surfaces": {
+      "file": "02_churn.sql",
+      "source": "TRANSFORMED_DATA.PRODUCT_API_REQUESTS_DAILY",
+      "dims": {"name": "surface", "value_cols": ["surface"]},
+      "metrics": {"accounts": "accounts", "reqs": "requests", "writes": "requests", "churned": "accounts", "gross": "usd"},
+      "churn_metrics": ["churned"]
+    },
+    "token_use": {
+      "file": "02_churn.sql",
+      "source": "TRANSFORMED_DATA.PRODUCT_API_REQUESTS_DAILY",
+      "dims": {"name_col": "dim", "value_col": "val"},
+      "metrics": {"accounts": "accounts", "churned": "accounts", "gross": "usd"},
+      "churn_metrics": ["churned"]
+    },
+    "revenue_products": {
+      "file": "03_revenue.sql",
+      "source": "MFD.INVOICE_ITEMS_NET; PRICING.SKU_DETAIL_CONSOLIDATED",
+      "dims": {"name_col": "dim", "value_col": "val"},
+      "metrics": {"accounts": "accounts", "gross": "usd", "net": "usd"}
+    },
+    "agentic": {
+      "file": "04_agentic.sql",
+      "source": "SERVERLESS_INFERENCE_GPU_NET_REVENUE; DEDICATED_INFERENCE_DAILY_CAPACITY; GEN_AI_STARFISH_AGENTS; PRODUCT_API_REQUESTS_DAILY",
+      "dims": {"name": "agentic_signal", "value_cols": ["signal"]},
+      "metrics": {"accounts": "accounts", "active_accounts": "accounts", "churned": "accounts",
+                  "acct_total_gross": "usd", "volume": "signal_units", "signal_net_revenue": "usd"},
+      "churn_metrics": ["churned"]
+    },
+    "agentic_adjacency": {
+      "file": "04_agentic.sql",
+      "source": "MFD.INVOICE_ITEMS_NET; agentic signals",
+      "dims": {"name": "cohort|product_group", "value_cols": ["cohort", "product_group"]},
+      "metrics": {"accounts": "accounts", "cohort_size": "accounts"}
+    },
+    "libraries_sample": {
+      "file": "05_libraries.sql",
+      "source": "TRANSFORMED_DATA.EDGE_API_REQUESTS (one sample day per month)",
+      "dims": {"name": "host|family", "value_cols": ["host_grp", "family"]},
+      "metrics": {"reqs": "requests_per_sample_day", "writes": "requests_per_sample_day",
+                  "accounts": "accounts_per_sample_day", "users": "users_per_sample_day"}
+    },
+    "library_products": {
+      "file": "05_libraries.sql",
+      "source": "TRANSFORMED_DATA.PRODUCT_API_REQUESTS_DAILY",
+      "dims": {"name": "family|product", "value_cols": ["family", "product"]},
+      "rotating": true,
+      "metrics": {"accounts": "accounts", "reqs": "requests", "writes": "requests"}
+    },
+    "mcp": {
+      "file": "06_mcp.sql",
+      "source": "TRANSFORMED_DATA.PRODUCT_API_REQUESTS_DAILY",
+      "dims": {"name_col": "dim", "value_col": "val"},
+      "rotating_dims": ["mcp_product"],
+      "metrics": {"accounts": "accounts", "reqs": "requests", "writes": "requests",
+                  "new_accounts": "accounts", "retained_from_prev": "accounts"}
+    },
+    "coverage_daily": {
+      "file": "06_mcp.sql",
+      "source": "TRANSFORMED_DATA.PRODUCT_API_REQUESTS_DAILY (raw-log sample day only)",
+      "dims": {"name": "family", "value_cols": ["family"]},
+      "metrics": {"accounts": "accounts_per_sample_day", "reqs": "requests_per_sample_day"}
+    }
+  }
+}
