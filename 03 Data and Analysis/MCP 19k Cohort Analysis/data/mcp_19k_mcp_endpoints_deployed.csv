@@ -1,0 +1,16 @@
+endpoint_name,category,is_true_infra_endpoint,mcp_any_call_accts,mcp_any_call_pct_of_visible,mcp_write_post_put_patch_accts,mcp_write_conversion_of_readers_pct,verified_billed_deploy_accts,verified_share_of_writers_pct,only_mcp_write_accts,only_mcp_verified_deploy_accts,mcp_plus_others_write_accts,mcp_plus_others_verified_deploy_accts
+Droplets & 1-Clicks,Compute,Yes,13310,79.55,4814,36.2,4572,95.0,2715,2502,2099,2070
+App Platform,Compute (PaaS),Yes,4743,28.35,1896,40.0,1761,92.9,421,364,1475,1397
+Functions,Serverless,Yes,268,1.6,80,29.9,6,7.5,10,0,70,6
+DOKS (Kubernetes),Containers,Yes,776,4.64,74,9.5,65,87.8,2,0,72,65
+Managed Databases (PG/MySQL/Valkey/Mongo/Kafka/OS),Databases,Yes,3083,18.43,971,31.5,952,98.0,154,146,817,806
+Vector Databases,AI & Data,Yes,88,0.53,4,4.5,2,50.0,0,0,4,2
+Spaces Object Storage,Storage,Yes,978,5.85,390,39.9,359,92.1,54,45,336,314
+Volumes Block Storage & NFS,Storage,Yes,696,4.16,89,12.8,79,88.8,20,18,69,61
+Container Registry (DOCR),Containers,Yes,586,3.5,94,16.0,74,78.7,13,9,81,65
+Cloud Firewalls,Networking,Yes,2101,12.56,850,40.5,844,99.3,262,262,588,582
+"Domains, DNS, CDN & Certificates",Networking,Yes,2378,14.21,578,24.3,550,95.2,98,95,480,455
+"VPCs, Load Balancers & Reserved IPs",Networking,Yes,1571,9.39,200,12.7,197,98.5,53,53,147,144
+Gradient AI / Agents / Dedicated Inference / MicroVMs,AI & Sandboxes,Yes,253,1.51,38,15.0,26,68.4,6,4,32,22
+"Account, SSH Keys, Projects, Tags & Images (Non-Infra)",Config / Admin,No,10185,60.87,3200,31.4,0,0.0,2217,0,983,0
+"Uptime, Monitoring & Insights (Non-Infra)",Observability,No,1369,8.18,579,42.3,0,0.0,115,0,464,0

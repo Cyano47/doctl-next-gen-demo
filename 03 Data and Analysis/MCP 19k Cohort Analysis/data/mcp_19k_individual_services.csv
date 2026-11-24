@@ -1,0 +1,24 @@
+service_name,service_category,era_accounts,era_attach_pct_all_clean,oct_2026_active_accounts,oct_2026_attach_pct_all_clean,only_mcp_accounts,only_mcp_attach_pct,mcp_plus_others_accounts,mcp_plus_others_attach_pct,verified_mcp_deployer_s4_accounts,verified_mcp_deployer_s4_attach_pct,read_only_s1_accounts,read_only_s1_attach_pct,stayed_back_mcp_attach_pct,churned_away_mcp_attach_pct,just_tried_mcp_attach_pct
+Droplets (incl. Backups & Snapshots),Core Compute,13250,69.49,10957,57.46,6301,57.0,6949,86.71,6121,90.91,5036,59.54,77.96,79.58,61.92
+App Platform,PaaS / Serverless,4952,25.97,3435,18.01,1072,9.7,3880,48.42,2501,37.15,1745,20.63,24.81,43.31,25.01
+Functions,PaaS / Serverless,42,0.22,16,0.08,0,0.0,42,0.52,20,0.3,14,0.17,0.2,0.31,0.22
+DOKS (Managed Kubernetes),Containers,984,5.16,581,3.05,24,0.22,960,11.98,369,5.48,437,5.17,4.53,7.57,6.2
+Managed PostgreSQL,Managed Databases,4341,22.77,3175,16.65,826,7.47,3515,43.86,2125,31.56,1626,19.22,24.05,36.27,19.43
+Managed MySQL,Managed Databases,1212,6.36,856,4.49,253,2.29,959,11.97,519,7.71,506,5.98,6.85,7.91,6.1
+Managed Valkey / Redis,Managed Databases,1686,8.84,1202,6.3,172,1.56,1514,18.89,813,12.07,619,7.32,9.43,15.37,6.99
+Managed MongoDB,Managed Databases,675,3.54,446,2.34,104,0.94,571,7.13,314,4.66,260,3.07,3.87,5.59,2.8
+Managed OpenSearch / Vector,Managed Databases,673,3.53,280,1.47,63,0.57,610,7.61,299,4.44,249,2.94,3.45,5.87,3.54
+Managed Kafka,Managed Databases,66,0.35,36,0.19,2,0.02,64,0.8,24,0.36,29,0.34,0.45,0.31,0.38
+Spaces Object Storage,Storage,4798,25.16,4075,21.37,991,8.97,3807,47.5,2263,33.61,1859,21.98,27.95,35.82,21.39
+Volumes Block Storage / NFS,Storage,2196,11.52,1569,8.23,476,4.31,1720,21.46,962,14.29,889,10.51,13.27,13.61,10.67
+Container Registry (DOCR),Containers,1701,8.92,1243,6.52,104,0.94,1597,19.93,770,11.44,663,7.84,8.69,14.89,8.94
+Networking (Load Balancers / Reserved IPs / VPC),Networking,1750,9.18,1064,5.58,176,1.59,1574,19.64,703,10.44,747,8.83,9.11,13.38,9.34
+GPU Droplets / Bare Metal / Paperspace,AI & GPU Compute,409,2.14,115,0.6,73,0.66,336,4.19,193,2.87,149,1.76,2.42,2.71,2.03
+Gradient Serverless Inference (Billed or Usage),Gradient AI Platform,843,4.42,347,1.82,135,1.22,708,8.83,379,5.63,298,3.52,4.41,6.31,4.27
+Gradient Dedicated Inference,Gradient AI Platform,9,0.05,2,0.01,0,0.0,9,0.11,5,0.07,3,0.04,0.07,0.06,0.04
+Gradient Agent Platform (Billed or Active Agent),Gradient AI Platform,490,2.57,62,0.33,62,0.56,428,5.34,206,3.06,179,2.12,2.16,4.0,3.24
+Gradient Knowledge Bases (Billed or Active KB),Gradient AI Platform,74,0.39,40,0.21,4,0.04,70,0.87,27,0.4,27,0.32,0.44,0.45,0.4
+Gradient Model Routers,Gradient AI Platform,121,0.63,15,0.08,20,0.18,101,1.26,60,0.89,32,0.38,0.57,0.92,0.62
+Sandboxes / MicroVMs / OHS Sessions,Agentic Runtime,101,0.53,88,0.46,13,0.12,88,1.1,50,0.74,27,0.32,0.7,0.22,0.28
+Action Gateway (Billed or Tool Calls),Agentic Runtime,67,0.35,53,0.28,17,0.15,50,0.62,23,0.34,23,0.27,0.47,0.03,0.18
+Marketplace Paid Add-ons & Uptime,Ecosystem / Ops,891,4.67,690,3.62,96,0.87,795,9.92,408,6.06,339,4.01,5.88,6.37,3.44

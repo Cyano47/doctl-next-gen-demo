@@ -1,0 +1,35 @@
+dimension,segment,accounts,pct_of_clean_total,only_mcp_accts,only_mcp_share_pct,mcp_plus_others_accts,stayed_back_mcp_accts,stayed_back_mcp_pct,oct_paid_do_accts,oct_paid_do_pct,verified_mcp_deployer_s4_pct_of_vis,oct_2026_gross_usd
+Account Tenure at First MCP Call,1. Brand-New Signup (0-7d),7131,37.4,5960,83.6,1171,2540,35.6,2833,39.7,34.0,130984.84
+Account Tenure at First MCP Call,2. Recent Signup (8-30d),1403,7.4,839,59.8,564,519,37.0,926,66.0,41.5,83723.39
+Account Tenure at First MCP Call,3. Developing (31-180d),2474,13.0,1261,51.0,1213,914,36.9,1861,75.2,41.8,417110.47
+Account Tenure at First MCP Call,4. Established (181-365d),1460,7.7,625,42.8,835,553,37.9,1183,81.0,44.8,243735.31
+Account Tenure at First MCP Call,5. Veteran DO Customer (1yr+),6600,34.6,2369,35.9,4231,2322,35.2,5779,87.6,45.1,3728754.41
+Peak Monthly DO Gross Spend Band,0. Never Billed ($0),4247,22.3,4166,98.1,81,1061,25.0,0,0.0,0.0,0.0
+Peak Monthly DO Gross Spend Band,1. Legacy Billed (<Mar 2025 only),119,0.6,98,82.4,21,16,13.4,0,0.0,0.0,0.0
+Peak Monthly DO Gross Spend Band,2. Micro (<$15/mo),3552,18.6,2624,73.9,928,1236,34.8,2756,77.6,48.8,18331.38
+Peak Monthly DO Gross Spend Band,3. Hobby ($15-$49/mo),4297,22.5,2479,57.7,1818,1711,39.8,3591,83.6,51.1,91484.58
+Peak Monthly DO Gross Spend Band,4. Builder ($50-$249/mo),4425,23.2,1432,32.4,2993,1777,40.2,3903,88.2,54.7,364077.38
+Peak Monthly DO Gross Spend Band,5. Growth ($250-$999/mo),1595,8.4,208,13.0,1387,696,43.6,1526,95.7,53.2,608567.68
+Peak Monthly DO Gross Spend Band,"6. Scaler ($1,000+/mo)",833,4.4,47,5.6,786,351,42.1,806,96.8,42.3,3521847.4
+DO Revenue Tier (Latest Paid Month),0. Unbilled / No Tier,4244,22.3,4172,98.3,72,1070,25.2,0,0.0,0.0,0.0
+DO Revenue Tier (Latest Paid Month),1. Learner (<$50/mo tier),8554,44.9,5127,59.9,3427,3083,36.0,6951,81.3,49.9,203103.59
+DO Revenue Tier (Latest Paid Month),2. Builder ($50-$249/mo tier),5095,26.7,1656,32.5,3439,2171,42.6,4494,88.2,54.9,712639.98
+DO Revenue Tier (Latest Paid Month),3. Scaler ($250+/mo tier),1121,5.9,78,7.0,1043,514,45.9,1106,98.7,42.7,3688047.54
+DO Revenue Tier (Latest Paid Month),4. Other / Unclassified Tier,54,0.3,21,38.9,33,10,18.5,31,57.4,14.0,517.31
+Email & Identity Archetype,1. Custom / Corporate Domain,6858,36.0,2579,37.6,4279,2395,34.9,5496,80.1,46.8,3839451.26
+Email & Identity Archetype,2. Free Consumer Email (Gmail/Outlook/etc.),12056,63.2,8390,69.6,3666,4426,36.7,7023,58.3,36.5,754858.59
+Email & Identity Archetype,3. University Domain (.edu / academic),150,0.8,82,54.7,68,25,16.7,62,41.3,37.8,9998.56
+Email & Identity Archetype,4. Autonomous Agent Inbox (grokbot / agentmail),4,0.0,3,75.0,1,2,50.0,1,25.0,0.0,0.01
+GitHub Student Pack,GitHub Student Pack Verified,523,2.7,255,48.8,268,64,12.2,180,34.4,51.3,9170.96
+GitHub Student Pack,Non-Student,18545,97.3,10799,58.2,7746,6784,36.6,12402,66.9,40.0,4595137.46
+First AI Web Referrer,0. Direct / Organic / Non-AI Web,16737,87.8,8909,53.2,7828,5866,35.0,11700,69.9,42.0,4554096.85
+First AI Web Referrer,1. ChatGPT / OpenAI Referrer,2234,11.7,2098,93.9,136,955,42.7,819,36.7,27.5,43709.88
+First AI Web Referrer,2. Claude / Anthropic Referrer,24,0.1,6,25.0,18,10,41.7,21,87.5,31.8,2839.33
+First AI Web Referrer,3. Google Gemini Referrer,26,0.1,20,76.9,6,8,30.8,18,69.2,31.8,1207.26
+First AI Web Referrer,4. Perplexity Referrer,41,0.2,17,41.5,24,8,19.5,20,48.8,44.1,2372.93
+First AI Web Referrer,5. Other AI Referrer (Cursor/Grok/Copilot/DeepSeek),6,0.0,4,66.7,2,1,16.7,4,66.7,66.7,82.17
+MCP Transport Mode,Local / 3P MCP Only,5640,29.6,1721,30.5,3919,1206,21.4,4260,75.5,54.1,2255650.44
+MCP Transport Mode,Remote MCP (do-remote-mcp),13428,70.4,9333,69.5,4095,5642,42.0,8322,62.0,34.7,2348657.98
+URN Account Type,legacy_null,114,0.6,43,37.7,71,47,41.2,114,100.0,40.2,23741.24
+URN Account Type,team,18065,94.7,10820,59.9,7245,6443,35.7,11647,64.5,39.7,3891771.12
+URN Account Type,teamgroup (Enterprise),889,4.7,191,21.5,698,358,40.3,821,92.4,51.5,688796.06

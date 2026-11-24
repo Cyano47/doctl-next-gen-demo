@@ -1,0 +1,11 @@
+step,accounts,notes
+1_sheet_account_retention_lte_2026_10_31,19074,Account Retention tab filtered to First_Request_Date <= 2026-10-31 (0 Nov-starter rows in sheet excluded)
+2_snowflake_daily_valid_mcp_lte_2026_10_31,16977,"PRODUCT_API_REQUESTS_DAILY < 2026-11-01 after excluding synthetic/probe MCP UAs (1 probe-only account dropped from 16,978 raw)"
+3_hybrid_union_raw,19314,16737 in both + 2337 Sheet-only (EDGE unsampled) + 240 Daily-only (pre-Jun-2025 local / 3P MCP)
+4_excl_missing_core_or_synthetic_qa_id,-2,"Missing CORE.ACCOUNTS row (e.g. account_id=0) or QA IDs (38082003, 6595347, 3057872, 31664295)"
+5_excl_do_employee,-199,@digitalocean.com or is_free_employee
+6_excl_test_or_free_internal,-1,is_test or is_free
+7_excl_abuse_or_admin_locked,-44,is_abuse or is_admin_locked (suspended/hold/archived churners KEPT)
+8_clean_customer_spine_all_urn,19068,Clean customer universe: 18065 team + 889 enterprise teamgroup + 114 legacy NULL URN
+9_clean_customer_spine_team_only,18065,Strict account_urn_type = 'team' subset
+10_clean_customer_in_daily_endpoint_table,16732,Clean accounts with endpoint & HTTP-verb visibility in PRODUCT_API_REQUESTS_DAILY

@@ -1,0 +1,16 @@
+interface_cohort,deploy_stage,accounts,pct_of_cohort_all,pct_of_visible_daily,remote_mcp_pct,pre_oct_starters,pre_oct_mcp_oct_retained_accts,pre_oct_mcp_oct_retention_pct,ever_billed_accts,oct_paid_do_accts,oct_paid_do_share_pct,do_paid_retention_of_billed_pct,oct_2026_gross_usd,oct_arpa_paid_usd
+ALL_MCP,Stage 1 — Read-Only Explorer (100% GET),8458,44.4,50.5,77.1,5444,1912,35.1,5707,4916,58.1,86.1,2385610.26,485.27
+ALL_MCP,Stage 2 — SSH Key / Ops Config / Cleanup Only,1154,6.1,6.9,84.1,724,321,44.3,620,541,46.9,87.3,179984.03,332.69
+ALL_MCP,Stage 3 — Unbilled / Blocked MCP Infra Write,387,2.0,2.3,77.3,253,68,26.9,142,80,20.7,56.3,11780.16,147.25
+ALL_MCP,Stage 4 — Verified MCP Infra Deployer (Write + Billed),6733,35.3,40.2,61.5,5117,2410,47.1,6733,5825,86.5,86.5,1654576.02,284.05
+ALL_MCP,Stage 0 — Unsampled in Daily Endpoint Table,2336,12.3,0.0,64.0,1772,54,3.0,1619,1220,52.2,75.4,372357.95,305.21
+1. Only MCP,Stage 1 — Read-Only Explorer (100% GET),5427,49.1,57.1,88.7,3199,1195,37.4,2720,2276,41.9,83.7,154480.35,67.87
+1. Only MCP,Stage 2 — SSH Key / Ops Config / Cleanup Only,814,7.4,8.6,95.0,494,207,41.9,285,238,29.2,83.5,9674.35,40.65
+1. Only MCP,Stage 3 — Unbilled / Blocked MCP Infra Write,278,2.5,2.9,83.8,185,53,28.6,56,29,10.4,51.8,1699.99,58.62
+1. Only MCP,Stage 4 — Verified MCP Infra Deployer (Write + Billed),2985,27.0,31.4,78.6,1943,1038,53.4,2985,2564,85.9,85.9,129973.26,50.69
+1. Only MCP,Stage 0 — Unsampled in Daily Endpoint Table,1550,14.0,0.0,75.3,1099,39,3.5,842,589,38.0,70.0,27212.63,46.2
+2. MCP + Others,Stage 1 — Read-Only Explorer (100% GET),3031,37.8,41.9,56.5,2245,717,31.9,2987,2640,87.1,88.4,2231129.91,845.12
+2. MCP + Others,Stage 2 — SSH Key / Ops Config / Cleanup Only,340,4.2,4.7,58.2,230,114,49.6,335,303,89.1,90.4,170309.68,562.08
+2. MCP + Others,Stage 3 — Unbilled / Blocked MCP Infra Write,109,1.4,1.5,60.6,68,15,22.1,86,51,46.8,59.3,10080.17,197.65
+2. MCP + Others,Stage 4 — Verified MCP Infra Deployer (Write + Billed),3748,46.8,51.9,47.8,3174,1372,43.2,3748,3261,87.0,87.0,1524602.76,467.53
+2. MCP + Others,Stage 0 — Unsampled in Daily Endpoint Table,786,9.8,0.0,41.7,673,15,2.2,777,631,80.3,81.2,345145.32,546.98
